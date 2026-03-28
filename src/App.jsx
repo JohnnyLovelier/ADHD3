@@ -15,10 +15,9 @@ const INAT=mkItems(A_Q,A_AD,A_CH), HYPER=mkItems(HI_Q,HI_AD,HI_CH);
 const IMP_AD={work:{label:"Work / Education",items:["Has not reached the level of education for the desired job","Works below education level","Quickly tired of a workplace","Succession of several short-term jobs","Difficulty with administrative work/planning","Does not get promotions","Underperforming at work","Quit a job or was fired after a dispute","Sick leave or disability related to symptoms","Impact limited by compensation through high intellectual level","Impact limited by compensation through external structure"]},rel:{label:"Relationships and/or Family",items:["Quickly tired of relationships","Impulsively starts/ends relationships","Partner needs to compensate for symptoms","Relationship problems, many arguments, lack of intimacy","Divorce because of symptoms","Sexual problems because of symptoms","Parenting problems because of symptoms","Domestic and/or administrative difficulties","Financial problems or gambling","Does not dare to start a relationship"]},soc:{label:"Social contacts",items:["Quickly tired of social contacts","Difficulty maintaining social contacts","Conflicts resulting from communication problems","Difficulty initiating social contacts","Low self-assertion","Inattention (forgetting to send a card, to be empathetic, etc.)"]},lei:{label:"Leisure / Hobby",items:["Unable to fully relax during leisure time","Forced to exercise a lot to relax","Injuries from excessive exercise","Unable to finish a book or watch a movie to the end","Tired because always busy","Quickly bored by hobbies","Accidents or license suspension","Sensation seeking and/or excessive risk-taking","Problems with police/justice","Binge eating"]},self:{label:"Self-confidence / Self-image",items:["Self-doubt following negative remarks from others","Negative self-image due to past failures","Fear of failure when starting new things","Excessive reaction to criticism","Perfectionism","Affected by ADHD symptoms"]}};
 const IMP_CH={edu:{label:"Education",items:["Education level lower than predicted by IQ","Grade retention due to concentration problems","Incomplete studies / Expelled from school","More years needed to complete studies than necessary","Achieved education level matching IQ but with great difficulty","Difficulty doing homework","Special education because of symptoms","Teacher comments about behavior or concentration","Impact limited by compensation through high intellectual level","Impact limited by compensation through external structure"]},fam:{label:"Family",items:["Frequent arguments with siblings","Frequent punishments or corrections","Little contact with family due to conflicts","Needed parental support for longer than normal"]},soc:{label:"Social contacts",items:["Difficulty maintaining social contacts","Conflicts resulting from communication problems","Difficulty initiating social contacts","Low self-assertion","Few friends","Teased by others","Excluded from the group or not invited to participate in activities","Acts tough"]},lei:{label:"Leisure / Hobby",items:["Unable to relax properly during leisure time","Forced to exercise a lot to relax","Injuries from excessive exercise","Unable to finish a book or watch a movie to the end","Tired because always busy","Quickly bored by hobbies","Sensation seeking and/or excessive risk-taking","Problems with police/justice","Increased number of accidents"]},self:{label:"Self-confidence / Self-image",items:["Self-doubt following negative remarks from others","Negative self-image due to past failures","Fear of failure before starting new things","Excessive reaction to criticism","Perfectionism"]}};
 
-// ─── Persistence: localStorage (replaces window.storage from Claude artifact) ───
-const SK = "diva2-english-v1";
-const load = () => { try { const raw = localStorage.getItem(SK); return raw ? JSON.parse(raw) : null; } catch { return null; } };
-const save = (s) => { try { localStorage.setItem(SK, JSON.stringify(s)); } catch {} };
+const SK="diva2-queen";
+const load=async()=>{try{const r=await window.storage.get(SK);return r?JSON.parse(r.value):null}catch{return null}};
+const save=async s=>{try{await window.storage.set(SK,JSON.stringify(s))}catch{}};
 
 /* Floating fruit sparkles */
 const Sparkles = () => {
@@ -53,7 +52,7 @@ const Card=({item,data,onTAd,onTCh,onSAd,onSCh})=>{
   const bothNo=data.adultPresent===false&&data.childPresent===false;
   const bg=bothYes?`linear-gradient(135deg,${P.yes},${P.yesD})`:oneYes?`linear-gradient(135deg,#f59e0b,#d97706)`:bothNo?`linear-gradient(135deg,${P.no},${P.noD})`:`linear-gradient(135deg,${P.ac},${P.bgd})`;
   return (
-    <div style={{background:"#fff",borderRadius:16,boxShadow:"0 2px 8px rgba(249,115,22,0.08)",marginBottom:14,overflow:"hidden",border:`1px solid ${P.cb}`,transition:"transform 0.2s"}}>
+    <div style={{background:"#fff",borderRadius:16,boxShadow:"0 2px 8px rgba(249,115,22,0.08)",marginBottom:14,overflow:"hidden",border:`1px solid ${P.cb}`,transition:"transform 0.2s",":hover":{transform:"translateY(-1px)"}}}>
       <button onClick={()=>setOpen(!open)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 18px",background:"none",border:"none",cursor:"pointer",textAlign:"left",gap:12}}>
         <div style={{display:"flex",alignItems:"center",gap:12,flex:1}}>
           <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:34,height:34,minWidth:34,borderRadius:10,background:bg,color:"#fff",fontWeight:700,fontSize:12,fontFamily:"monospace",transition:"all 0.3s",boxShadow:bothYes?"0 2px 8px rgba(34,197,94,0.3)":oneYes?"0 2px 8px rgba(245,158,11,0.3)":""}}>{item.id}</span>
@@ -62,7 +61,7 @@ const Card=({item,data,onTAd,onTCh,onSAd,onSCh})=>{
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{transform:open?"rotate(180deg)":"rotate(0)",transition:"transform 0.2s",minWidth:20}}><path d="M5 7.5L10 12.5L15 7.5" stroke={P.tl} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
       </button>
       {open&&<div style={{padding:"0 18px 18px"}}>
-        {[["adult","Adulthood",P.p],["child","Childhood (5–12 yrs)",P.ch]].map(([age,lbl,col])=>(
+        {[["adult","Adulthood",P.p],["child","Childhood (5-12 yrs)",P.ch]].map(([age,lbl,col])=>(
           <div key={age} style={{marginBottom:age==="adult"?16:0,borderTop:age==="child"?`1px solid ${P.ac}`:"none",paddingTop:age==="child"?16:0}}>
             <div style={{fontSize:12,fontWeight:700,textTransform:"uppercase",letterSpacing:1,color:col,marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
               <span style={{width:8,height:8,borderRadius:"50%",background:col}}/>{lbl}
@@ -78,19 +77,47 @@ const Card=({item,data,onTAd,onTCh,onSAd,onSCh})=>{
   );
 };
 
-const ImpDom=({domain,checked,onToggle})=>(
-  <div style={{marginBottom:16}}>
-    <div style={{fontSize:13,fontWeight:700,color:P.tx,marginBottom:6,paddingBottom:4,borderBottom:`1px solid ${P.ac}`}}>{domain.label}</div>
-    <div style={{display:"flex",flexDirection:"column",gap:2}}>{domain.items.map((it,i)=><Chk key={i} label={it} checked={checked[i]||false} onChange={()=>onToggle(i)}/>)}</div>
-  </div>
-);
+const ImpDom=({domain,checked,onToggle,present,onPresent})=>{
+  const [open,setOpen]=useState(false);
+  const anyChecked=checked.some(Boolean);
+  const checkedCount=checked.filter(Boolean).length;
+  return (
+    <div style={{marginBottom:16,background:present===true?"rgba(34,197,94,0.04)":present===false?"rgba(239,68,68,0.03)":"transparent",borderRadius:12,padding:"12px 14px",border:`1px solid ${present===true?"rgba(34,197,94,0.2)":present===false?"rgba(239,68,68,0.1)":P.ac}`,transition:"all 0.2s"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+        <div style={{fontSize:13,fontWeight:700,color:P.tx}}>{domain.label}</div>
+        {anyChecked&&<span style={{fontSize:11,color:P.tm,fontFamily:"monospace"}}>{checkedCount}/{domain.items.length}</span>}
+      </div>
+      <Tog value={present} onChange={onPresent} label="Domain impacted:"/>
+      <button onClick={()=>setOpen(!open)} style={{display:"flex",alignItems:"center",gap:6,marginTop:10,padding:"6px 0",background:"none",border:"none",cursor:"pointer",fontSize:12,color:P.tm,fontWeight:500}}>
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" style={{transform:open?"rotate(180deg)":"rotate(0)",transition:"transform 0.2s"}}><path d="M5 7.5L10 12.5L15 7.5" stroke={P.tl} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        {open?"Hide examples":"Show examples (optional)"}
+      </button>
+      {open&&<div style={{display:"flex",flexDirection:"column",gap:2,marginTop:6}}>{domain.items.map((it,i)=><Chk key={i} label={it} checked={checked[i]||false} onChange={()=>onToggle(i)}/>)}</div>}
+    </div>
+  );
+};
 
 const Bdg=({value,max,label})=>{
   const pct=max>0?value/max:0;const c=value>=6?P.yes:value>=4?"#f59e0b":P.no;
   return <div style={{textAlign:"center"}}><div style={{width:64,height:64,borderRadius:"50%",border:`4px solid ${c}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 6px",background:`conic-gradient(${c} ${pct*360}deg, ${P.bgd} 0deg)`,transition:"all 0.3s"}}><div style={{width:48,height:48,borderRadius:"50%",background:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:20,color:c,fontFamily:"monospace"}}>{value}</div></div><div style={{fontSize:11,color:P.tm,fontWeight:600}}>{label}</div><div style={{fontSize:10,color:P.tl}}>/ {max}</div></div>;
 };
 
-const mkDef=()=>({inat:INAT.map(it=>({adultChecked:Array(it.adult.length).fill(false),childChecked:Array(it.child.length).fill(false),adultPresent:null,childPresent:null})),hyp:HYPER.map(it=>({adultChecked:Array(it.adult.length).fill(false),childChecked:Array(it.child.length).fill(false),adultPresent:null,childPresent:null})),impAd:Object.fromEntries(Object.keys(IMP_AD).map(k=>[k,Array(IMP_AD[k].items.length).fill(false)])),impCh:Object.fromEntries(Object.keys(IMP_CH).map(k=>[k,Array(IMP_CH[k].items.length).fill(false)])),onset:null,onsetAge:"",crE:null,crEDet:""});
+const mkDef=()=>({
+  inat:INAT.map(it=>({adultChecked:Array(it.adult.length).fill(false),childChecked:Array(it.child.length).fill(false),adultPresent:null,childPresent:null})),
+  hyp:HYPER.map(it=>({adultChecked:Array(it.adult.length).fill(false),childChecked:Array(it.child.length).fill(false),adultPresent:null,childPresent:null})),
+  impAd:Object.fromEntries(Object.keys(IMP_AD).map(k=>[k,Array(IMP_AD[k].items.length).fill(false)])),
+  impCh:Object.fromEntries(Object.keys(IMP_CH).map(k=>[k,Array(IMP_CH[k].items.length).fill(false)])),
+  impAdDom:Object.fromEntries(Object.keys(IMP_AD).map(k=>[k,null])),
+  impChDom:Object.fromEntries(Object.keys(IMP_CH).map(k=>[k,null])),
+  onset:null,onsetAge:"",crE:null,crEDet:""
+});
+
+/* Migrate old saved state that lacks the new domain-level toggles */
+const migrate=(d)=>{
+  if(!d.impAdDom) d.impAdDom=Object.fromEntries(Object.keys(IMP_AD).map(k=>[k, d.impAd&&d.impAd[k]&&d.impAd[k].some(Boolean)?true:null]));
+  if(!d.impChDom) d.impChDom=Object.fromEntries(Object.keys(IMP_CH).map(k=>[k, d.impCh&&d.impCh[k]&&d.impCh[k].some(Boolean)?true:null]));
+  return d;
+};
 
 export default function App(){
   const [s,setS]=useState(mkDef());
@@ -99,20 +126,54 @@ export default function App(){
   const [ld,setLd]=useState(true);
   const top=useRef(null);
 
-  useEffect(()=>{const d=load();if(d)setS(d);setLd(false);},[]);
+  useEffect(()=>{(async()=>{const d=await load();if(d)setS(migrate(d));setLd(false)})()},[]);
   useEffect(()=>{if(!ld)save(s)},[s,ld]);
   useEffect(()=>{top.current?.scrollIntoView({behavior:"smooth"})},[sec,sub]);
 
   const upSym=(cat,i,f,v)=>setS(p=>{const n={...p};n[cat]=[...p[cat]];n[cat][i]={...p[cat][i],[f]:v};return n});
-  const togEx=(cat,i,af,ei)=>setS(p=>{const n={...p};n[cat]=[...p[cat]];const a=[...p[cat][i][af]];a[ei]=!a[ei];n[cat][i]={...p[cat][i],[af]:a};return n});
-  const togImp=(age,dom,i)=>setS(p=>{const k=age==="adult"?"impAd":"impCh";const n={...p};n[k]={...p[k]};const a=[...p[k][dom]];a[i]=!a[i];n[k][dom]=a;return n});
+
+  /* Toggle example checkbox + auto-set "Symptom present: Yes" when majority checked */
+  const togEx=(cat,i,af,ei)=>setS(p=>{
+    const n={...p};n[cat]=[...p[cat]];
+    const a=[...p[cat][i][af]];a[ei]=!a[ei];
+    const updated={...p[cat][i],[af]:a};
+    const presKey=af==="adultChecked"?"adultPresent":"childPresent";
+    const checkedCount=a.filter(Boolean).length;
+    const total=a.length;
+    if(checkedCount>total/2 && updated[presKey]!==true) updated[presKey]=true;
+    n[cat][i]=updated;
+    return n;
+  });
+
+  /* Toggle impairment example checkbox + auto-set "Domain impacted: Yes" when any example checked */
+  const togImp=(age,dom,i)=>setS(p=>{
+    const ck=age==="adult"?"impAd":"impCh";
+    const dk=age==="adult"?"impAdDom":"impChDom";
+    const n={...p};
+    n[ck]={...p[ck]};
+    const a=[...p[ck][dom]];a[i]=!a[i];n[ck][dom]=a;
+    if(a.some(Boolean)){
+      n[dk]={...p[dk],[dom]:true};
+    }
+    return n;
+  });
+
+  const setDomPresent=(age,dom,v)=>setS(p=>{
+    const dk=age==="adult"?"impAdDom":"impChDom";
+    return {...p,[dk]:{...p[dk],[dom]:v}};
+  });
 
   const aA=s.inat.filter(x=>x.adultPresent===true).length;
   const aC=s.inat.filter(x=>x.childPresent===true).length;
   const hA=s.hyp.filter(x=>x.adultPresent===true).length;
   const hC=s.hyp.filter(x=>x.childPresent===true).length;
-  const iA=Object.values(s.impAd).filter(a=>a.some(Boolean)).length;
-  const iC=Object.values(s.impCh).filter(a=>a.some(Boolean)).length;
+
+  const iA=Object.values(s.impAdDom||{}).filter(v=>v===true).length;
+  const iC=Object.values(s.impChDom||{}).filter(v=>v===true).length;
+  const iAAllAnswered=Object.values(s.impAdDom||{}).every(v=>v!==null);
+  const iCAllAnswered=Object.values(s.impChDom||{}).every(v=>v!==null);
+  const iAnyAnswered=Object.values(s.impAdDom||{}).some(v=>v!==null)||Object.values(s.impChDom||{}).some(v=>v!==null);
+
   const aCr=aA>=6&&aC>=6,hCr=hA>=6&&hC>=6,iM=iA>=2&&iC>=2;
   const oM=s.onset===true||(s.onset===false&&s.onsetAge!=="");
   const nE=s.crE===false;
@@ -122,11 +183,23 @@ export default function App(){
   else if(aCr&&!hCr&&iM&&nE) dg={c:"314.00",l:"Predominantly Inattentive Type"};
   else if(!aCr&&hCr&&iM&&nE) dg={c:"314.01",l:"Predominantly Hyperactive/Impulsive Type"};
 
-  const reset=()=>{if(window.confirm("Reset all answers?")){setS(mkDef());setSec(0);setSub(0);try{localStorage.removeItem(SK)}catch{}}};
+  const reset=async()=>{if(confirm("Reset all answers?")){setS(mkDef());setSec(0);setSub(0);try{await window.storage.delete(SK)}catch{}}};
 
   if(ld) return <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:P.bg,fontFamily:"system-ui"}}><div style={{textAlign:"center",color:P.tm}}><div style={{fontSize:40,marginBottom:12,animation:"pulse 1.5s ease-in-out infinite"}}>🍊</div>Loading...<style>{`@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}`}</style></div></div>;
 
   const its=sub===0?INAT:HYPER, cat=sub===0?"inat":"hyp";
+
+  const buildImpMsg=()=>{
+    if(!iAnyAnswered) return "Answer Yes or No for each impairment domain in the Impairment tab.";
+    if(iAAllAnswered&&iCAllAnswered&&!iM){
+      return `ADHD diagnosis not retained. Symptom criteria are met, but impairment is not present in at least 2 life domains at both ages (adult: ${iA}/2, childhood: ${iC}/2).`;
+    }
+    const parts=[];
+    if(!iAAllAnswered) parts.push("complete adult impairment domains");
+    if(!iCAllAnswered) parts.push("complete childhood impairment domains");
+    if(parts.length>0) return `Please ${parts.join(" and ")} in the Impairment tab.`;
+    return `Indicate "Domain impacted: Yes" in at least 2 domains for adulthood (${iA}/2) and childhood (${iC}/2) in the Impairment tab.`;
+  };
 
   return (
     <div style={{minHeight:"100vh",background:`linear-gradient(180deg,${P.bg},${P.bgd})`,fontFamily:"system-ui",paddingBottom:100}}>
@@ -135,8 +208,8 @@ export default function App(){
         <Sparkles/>
         <div style={{position:"relative",zIndex:1}}>
           <div style={{fontSize:14,opacity:0.9,marginBottom:6,letterSpacing:1}}>🍊 DIVA 2.0 🍊</div>
-          <div style={{fontSize:21,fontWeight:800,letterSpacing:-0.3,lineHeight:1.3,maxWidth:500,textShadow:"0 2px 12px rgba(0,0,0,0.1)"}}>English divas are you on the Diva 2 results ? Let&apos;s check!</div>
-          <div style={{fontSize:10,opacity:0.55,marginTop:10}}>Kooij &amp; Francken, 2010 — DIVA Foundation</div>
+          <div style={{fontSize:21,fontWeight:800,letterSpacing:-0.3,lineHeight:1.3,maxWidth:500,textShadow:"0 2px 12px rgba(0,0,0,0.1)"}}>Diagnostic Interview for ADHD in Adults</div>
+          <div style={{fontSize:10,opacity:0.55,marginTop:10}}>Kooij & Francken, 2010 - DIVA Foundation</div>
           <div style={{display:"flex",gap:10,marginTop:18,flexWrap:"wrap"}}>
             {[{l:"A adult",v:aA},{l:"A child",v:aC},{l:"H/I adult",v:hA},{l:"H/I child",v:hC}].map(({l,v})=>
               <div key={l} style={{background:v>=6?"rgba(34,197,94,0.3)":"rgba(255,255,255,0.15)",borderRadius:10,padding:"6px 12px",fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:6,backdropFilter:"blur(4px)",transition:"all 0.3s"}}>
@@ -155,35 +228,40 @@ export default function App(){
       <div style={{maxWidth:640,margin:"0 auto",padding:"16px 12px"}}>
         {sec===0&&<>
           <div style={{display:"flex",gap:8,marginBottom:16}}>
-            {["🍋 Inattention (A1–A9)","🍑 Hyperactivity-Impulsivity (H/I 1–9)"].map((l,i)=>
+            {["🍋 Inattention (A1-A9)","🍑 Hyperactivity-Impulsivity (H/I 1-9)"].map((l,i)=>
               <button key={i} onClick={()=>setSub(i)} style={{flex:1,padding:"10px 8px",borderRadius:12,border:"none",fontSize:12,fontWeight:700,cursor:"pointer",background:sub===i?(i===0?P.p:P.ch):P.bgd,color:sub===i?"#fff":P.tm,boxShadow:sub===i?"0 3px 12px rgba(249,115,22,0.25)":"none",transition:"all 0.2s",transform:sub===i?"scale(1.02)":"scale(1)"}}>{l}</button>
             )}
           </div>
           <div style={{fontSize:12,color:P.tm,marginBottom:14,padding:"10px 14px",background:P.bg,borderRadius:12,lineHeight:1.5,border:`1px solid ${P.ac}`}}>
-            🍇 Tap each criterion to expand it. Check the recognized examples, then indicate whether the symptom is present (<strong style={{color:P.yes}}>Yes</strong> / <strong style={{color:P.no}}>No</strong>) for adulthood and childhood.
+            🍇 Tap each criterion to expand it. Check the recognized examples, then indicate whether the symptom is present (<strong style={{color:P.yes}}>Yes</strong> / <strong style={{color:P.no}}>No</strong>) for adulthood and childhood. When the majority of examples are checked, "Yes" is set automatically (you can still change it).
           </div>
           {its.map((item,idx)=><Card key={item.id} item={item} data={s[cat][idx]} onTAd={ei=>togEx(cat,idx,"adultChecked",ei)} onTCh={ei=>togEx(cat,idx,"childChecked",ei)} onSAd={v=>upSym(cat,idx,"adultPresent",v)} onSCh={v=>upSym(cat,idx,"childPresent",v)}/>)}
         </>}
 
         {sec===1&&<>
           <div style={{background:"#fff",borderRadius:16,padding:18,marginBottom:16,border:`1px solid ${P.cb}`,boxShadow:"0 2px 8px rgba(249,115,22,0.08)"}}>
-            <div style={{fontSize:14,fontWeight:700,color:P.tx,marginBottom:12}}>🥭 Criterion B — Age of onset</div>
+            <div style={{fontSize:14,fontWeight:700,color:P.tx,marginBottom:12}}>🥭 Criterion B - Age of onset</div>
             <div style={{fontSize:13,color:P.tx,marginBottom:12,lineHeight:1.5}}>Have you always had these symptoms? Were some symptoms present before the age of 7?</div>
             <Tog value={s.onset} onChange={v=>setS(p=>({...p,onset:v}))} label="Before age 7:"/>
             {s.onset===false&&<div style={{marginTop:12,display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:13,color:P.tm}}>Age of onset:</span><input type="number" min="0" max="99" value={s.onsetAge} onChange={e=>setS(p=>({...p,onsetAge:e.target.value}))} style={{width:60,padding:"6px 10px",borderRadius:10,border:`1px solid ${P.cb}`,fontSize:14,fontWeight:600,textAlign:"center",color:P.tx,background:P.bg}}/><span style={{fontSize:13,color:P.tm}}>years</span></div>}
           </div>
+
+          <div style={{fontSize:12,color:P.tm,marginBottom:14,padding:"10px 14px",background:P.bg,borderRadius:12,lineHeight:1.5,border:`1px solid ${P.ac}`}}>
+            🍇 For each domain, indicate whether it is impacted by answering Yes or No. The examples are optional memory aids. You can answer "Yes" even if none of the listed examples match your experience.
+          </div>
+
           <div style={{background:"#fff",borderRadius:16,padding:18,marginBottom:16,border:`1px solid ${P.cb}`,boxShadow:"0 2px 8px rgba(249,115,22,0.08)"}}>
-            <div style={{fontSize:14,fontWeight:700,color:P.p,marginBottom:4}}>🍊 Criterion C — Impairment in adulthood</div>
-            <div style={{fontSize:11,color:iA>=2?P.yes:P.tl,fontWeight:600,marginBottom:14}}>{iA}/5 domains affected (≥ 2 required) {iA>=2?"🍓":""}</div>
-            {Object.entries(IMP_AD).map(([k,d])=><ImpDom key={k} domain={d} checked={s.impAd[k]} onToggle={i=>togImp("adult",k,i)}/>)}
+            <div style={{fontSize:14,fontWeight:700,color:P.p,marginBottom:4}}>🍊 Criteria C/D - Impairment in adulthood</div>
+            <div style={{fontSize:11,color:iA>=2?P.yes:P.tl,fontWeight:600,marginBottom:14}}>{iA}/5 domains impacted (min. 2 required) {iA>=2?"🍓":""}</div>
+            {Object.entries(IMP_AD).map(([k,d])=><ImpDom key={k} domain={d} checked={s.impAd[k]} onToggle={i=>togImp("adult",k,i)} present={s.impAdDom?.[k]??null} onPresent={v=>setDomPresent("adult",k,v)}/>)}
           </div>
           <div style={{background:"#fff",borderRadius:16,padding:18,marginBottom:16,border:`1px solid ${P.cb}`,boxShadow:"0 2px 8px rgba(249,115,22,0.08)"}}>
-            <div style={{fontSize:14,fontWeight:700,color:P.ch,marginBottom:4}}>🍑 Criterion C — Impairment in childhood</div>
-            <div style={{fontSize:11,color:iC>=2?P.yes:P.tl,fontWeight:600,marginBottom:14}}>{iC}/5 domains affected (≥ 2 required) {iC>=2?"🍓":""}</div>
-            {Object.entries(IMP_CH).map(([k,d])=><ImpDom key={k} domain={d} checked={s.impCh[k]} onToggle={i=>togImp("child",k,i)}/>)}
+            <div style={{fontSize:14,fontWeight:700,color:P.ch,marginBottom:4}}>🍑 Criteria C/D - Impairment in childhood</div>
+            <div style={{fontSize:11,color:iC>=2?P.yes:P.tl,fontWeight:600,marginBottom:14}}>{iC}/5 domains impacted (min. 2 required) {iC>=2?"🍓":""}</div>
+            {Object.entries(IMP_CH).map(([k,d])=><ImpDom key={k} domain={d} checked={s.impCh[k]} onToggle={i=>togImp("child",k,i)} present={s.impChDom?.[k]??null} onPresent={v=>setDomPresent("child",k,v)}/>)}
           </div>
           <div style={{background:"#fff",borderRadius:16,padding:18,marginBottom:16,border:`1px solid ${P.cb}`,boxShadow:"0 2px 8px rgba(249,115,22,0.08)"}}>
-            <div style={{fontSize:14,fontWeight:700,color:P.tx,marginBottom:12}}>🍒 Criterion E — Differential diagnosis</div>
+            <div style={{fontSize:14,fontWeight:700,color:P.tx,marginBottom:12}}>🍒 Criterion E - Differential diagnosis</div>
             <div style={{fontSize:13,color:P.tx,marginBottom:12,lineHeight:1.5}}>Can the symptoms be better explained by the presence of another psychiatric disorder?</div>
             <Tog value={s.crE} onChange={v=>setS(p=>({...p,crE:v}))} label="Better explained:"/>
             {s.crE===true&&<input type="text" placeholder="Specify the disorder..." value={s.crEDet} onChange={e=>setS(p=>({...p,crEDet:e.target.value}))} style={{marginTop:12,width:"100%",padding:"10px 14px",borderRadius:12,border:`1px solid ${P.cb}`,fontSize:13,boxSizing:"border-box",color:P.tx,background:P.bg}}/>}
@@ -200,9 +278,9 @@ export default function App(){
               <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
                 <thead><tr style={{borderBottom:`2px solid ${P.ac}`}}><th style={{textAlign:"left",padding:"8px 6px",color:P.tm}}>Criterion</th><th style={{textAlign:"center",padding:"8px 6px",color:P.p}}>Adult</th><th style={{textAlign:"center",padding:"8px 6px",color:P.ch}}>Child</th></tr></thead>
                 <tbody>
-                  {INAT.map((it,i)=><tr key={it.id} style={{borderBottom:`1px solid ${P.bgd}`}}><td style={{padding:"7px 6px",fontWeight:600,color:P.tx}}>{it.id}</td><td style={{textAlign:"center",padding:"7px 6px"}}>{s.inat[i].adultPresent===true?"🍓":s.inat[i].adultPresent===false?"—":"·"}</td><td style={{textAlign:"center",padding:"7px 6px"}}>{s.inat[i].childPresent===true?"🍓":s.inat[i].childPresent===false?"—":"·"}</td></tr>)}
+                  {INAT.map((it,i)=><tr key={it.id} style={{borderBottom:`1px solid ${P.bgd}`}}><td style={{padding:"7px 6px",fontWeight:600,color:P.tx}}>{it.id}</td><td style={{textAlign:"center",padding:"7px 6px"}}>{s.inat[i].adultPresent===true?"🍓":s.inat[i].adultPresent===false?"-":"·"}</td><td style={{textAlign:"center",padding:"7px 6px"}}>{s.inat[i].childPresent===true?"🍓":s.inat[i].childPresent===false?"-":"·"}</td></tr>)}
                   <tr style={{borderBottom:`2px solid ${P.ac}`,background:P.bg}}><td style={{padding:"8px 6px",fontWeight:700,color:P.tx}}>Total A</td><td style={{textAlign:"center",padding:"8px 6px",fontWeight:800,color:aA>=6?P.yes:P.no}}>{aA}/9</td><td style={{textAlign:"center",padding:"8px 6px",fontWeight:800,color:aC>=6?P.yes:P.no}}>{aC}/9</td></tr>
-                  {HYPER.map((it,i)=><tr key={it.id} style={{borderBottom:`1px solid ${P.bgd}`}}><td style={{padding:"7px 6px",fontWeight:600,color:P.tx}}>{it.id}</td><td style={{textAlign:"center",padding:"7px 6px"}}>{s.hyp[i].adultPresent===true?"🍓":s.hyp[i].adultPresent===false?"—":"·"}</td><td style={{textAlign:"center",padding:"7px 6px"}}>{s.hyp[i].childPresent===true?"🍓":s.hyp[i].childPresent===false?"—":"·"}</td></tr>)}
+                  {HYPER.map((it,i)=><tr key={it.id} style={{borderBottom:`1px solid ${P.bgd}`}}><td style={{padding:"7px 6px",fontWeight:600,color:P.tx}}>{it.id}</td><td style={{textAlign:"center",padding:"7px 6px"}}>{s.hyp[i].adultPresent===true?"🍓":s.hyp[i].adultPresent===false?"-":"·"}</td><td style={{textAlign:"center",padding:"7px 6px"}}>{s.hyp[i].childPresent===true?"🍓":s.hyp[i].childPresent===false?"-":"·"}</td></tr>)}
                   <tr style={{background:P.bg}}><td style={{padding:"8px 6px",fontWeight:700,color:P.tx}}>Total H/I</td><td style={{textAlign:"center",padding:"8px 6px",fontWeight:800,color:hA>=6?P.yes:P.no}}>{hA}/9</td><td style={{textAlign:"center",padding:"8px 6px",fontWeight:800,color:hC>=6?P.yes:P.no}}>{hC}/9</td></tr>
                 </tbody>
               </table>
@@ -211,7 +289,7 @@ export default function App(){
 
           <div style={{background:"#fff",borderRadius:16,padding:20,marginBottom:16,border:`1px solid ${P.cb}`,boxShadow:"0 2px 8px rgba(249,115,22,0.08)"}}>
             <div style={{fontSize:16,fontWeight:800,color:P.tx,marginBottom:16,textAlign:"center"}}>🍋 Scoring Form</div>
-            {[{l:"Criterion A: ≥ 6 Inattention (adult)",m:aA>=6},{l:"Criterion A: ≥ 6 Inattention (child)",m:aC>=6},{l:"Criterion A: ≥ 6 H/I (adult)",m:hA>=6},{l:"Criterion A: ≥ 6 H/I (child)",m:hC>=6},{l:"Criterion B: Onset before age 7 or age specified",m:oM},{l:"Criterion C: ≥ 2 domains (adult)",m:iA>=2},{l:"Criterion C: ≥ 2 domains (child)",m:iC>=2},{l:"Criterion E: Not better explained",m:nE}].map(({l,m},i)=>
+            {[{l:"Criterion A: >= 6 Inattention (adult)",m:aA>=6},{l:"Criterion A: >= 6 Inattention (child)",m:aC>=6},{l:"Criterion A: >= 6 H/I (adult)",m:hA>=6},{l:"Criterion A: >= 6 H/I (child)",m:hC>=6},{l:"Criterion B: Onset before age 7 or age specified",m:oM},{l:"Criteria C/D: >= 2 domains (adult)",m:iA>=2},{l:"Criteria C/D: >= 2 domains (child)",m:iC>=2},{l:"Criterion E: Not better explained",m:nE}].map(({l,m},i)=>
               <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 0",borderBottom:i<7?`1px solid ${P.bgd}`:"none"}}>
                 <span style={{width:24,height:24,minWidth:24,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",background:m?P.yes:P.bgd,color:"#fff",fontSize:13,boxShadow:m?"0 2px 6px rgba(34,197,94,0.3)":"none",transition:"all 0.3s"}}>{m?"✓":""}</span>
                 <span style={{fontSize:13,color:m?P.tx:P.tl,fontWeight:m?600:400}}>{l}</span>
@@ -224,8 +302,14 @@ export default function App(){
             <div style={{position:"relative",zIndex:1}}>
               <div style={{fontSize:12,fontWeight:700,textTransform:"uppercase",letterSpacing:2,color:dg?"rgba(255,255,255,0.6)":P.tl,marginBottom:12}}>{dg?"🍍 ":""}ADHD Diagnosis{dg?" 🍍":""}</div>
               {dg?<><div style={{fontSize:22,fontWeight:800,color:"#fff",marginBottom:8}}>{dg.l}</div><div style={{fontSize:14,color:"rgba(255,255,255,0.7)",fontFamily:"monospace"}}>DSM-IV {dg.c}</div></>
-              :<><div style={{fontSize:16,fontWeight:700,color:P.tx,marginBottom:8}}>{(aCr||hCr)&&!iM?"Symptom criteria met — complete impairment section":s.crE===true?"Symptoms better explained by another disorder":"Diagnostic criteria not met"}</div>
-                <div style={{fontSize:12,color:P.tm,lineHeight:1.5}}>{!aCr&&!hCr?"The threshold of 6 symptoms is not reached.":!iM?"Complete the Impairment section.":s.crE===null?"Complete criterion E.":""}</div></>}
+              :<><div style={{fontSize:16,fontWeight:700,color:P.tx,marginBottom:8}}>
+                {(aCr||hCr)&&!iM?(iAAllAnswered&&iCAllAnswered?"ADHD diagnosis not retained. Symptom criteria are met, but impairment is not present in at least 2 life domains at both ages.":"Symptom criteria met, complete impairment section")
+                :s.crE===true?"Symptoms better explained by another disorder"
+                :"Diagnostic criteria not met"}</div>
+                <div style={{fontSize:12,color:P.tm,lineHeight:1.5}}>
+                  {!aCr&&!hCr?"The threshold of 6 symptoms is not reached."
+                  :!iM?(iAAllAnswered&&iCAllAnswered?`Adult: ${iA}/2 domains impacted. Childhood: ${iC}/2 domains impacted.`:buildImpMsg())
+                  :s.crE===null?"Complete criterion E.":""}</div></>}
             </div>
           </div>
 
@@ -238,4 +322,3 @@ export default function App(){
     </div>
   );
 }
-
